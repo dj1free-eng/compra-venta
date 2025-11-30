@@ -116,6 +116,11 @@
       margin-bottom: 16px;
     }
 
+.form-highlight {
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.6), 0 12px 30px rgba(15, 23, 42, 0.25);
+  transition: box-shadow 0.2s ease;
+}
+
     @media (min-width: 768px) {
       .card {
         padding: 16px;
@@ -912,7 +917,7 @@
 
     <!-- TAB RESUMEN -->
     <section id="tab-resumen" class="tab-content">
-      <div class="card">
+      <div class="card" id="formCard">
         <div class="card-title">
           <span>Resumen de tus reventas</span>
         </div>
@@ -1488,15 +1493,15 @@
                   : '<span class="pill pill-stock">En stock</span>'
               }
             </div>
-            <div class="table-actions">
-              <button class="btn-mini edit" onclick="onEdit(${item.id})">Editar</button>
-              ${
-                !sold
-                  ? `<button class="btn-mini sell" onclick="onSell(${item.id})">Vender</button>`
-                  : ""
-              }
-              <button class="btn-mini delete" onclick="onDelete(${item.id})">Borrar</button>
-            </div>
+         <div class="table-actions">
+  <button class="btn-mini edit" onclick="onEdit(${item.id})" title="Editar">✏️</button>
+  ${
+    !sold
+      ? `<button class="btn-mini sell" onclick="onSell(${item.id})" title="Marcar como vendido">€</button>`
+      : ""
+  }
+  <button class="btn-mini delete" onclick="onDelete(${item.id})" title="Borrar">🗑️</button>
+</div>
           </div>
         `;
         })
@@ -1539,11 +1544,30 @@
     }
 
     function onEdit(id) {
-      const item = items.find((it) => it.id === id);
-      if (!item) return;
-      setEditMode(item);
-      document.querySelector('[data-tab="tab-apuntes"]').click();
-    }
+  const item = items.find((it) => it.id === id);
+  if (!item) return;
+
+  // Activar pestaña "Apuntes"
+  document.querySelector('[data-tab="tab-apuntes"]').click();
+
+  // Rellenar formulario en modo edición
+  setEditMode(item);
+
+  // Scroll suave hacia arriba para que se vea el formulario
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+
+  // Resaltar visualmente la tarjeta del formulario
+  const formCard = document.getElementById("formCard");
+  if (formCard) {
+    formCard.classList.add("form-highlight");
+    setTimeout(() => {
+      formCard.classList.remove("form-highlight");
+    }, 800);
+  }
+}
 
     function onSell(id) {
       const item = items.find((it) => it.id === id);
