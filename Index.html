@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestor de Reventas · Simple</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #f3f4ff;
+      --primary: #4f46e5;
+      --primary-soft: #e0e7ff;
+      --accent: #ec4899;
+      --danger: #ef4444;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #e0e7ff 0, #f9fafb 40%, #eef2ff 100%);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 16px 16px 24px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    @media (min-width: 768px) {
+      .app {
+        padding: 20px 24px 28px;
+      }
+    }
+
+    .app-header {
+      margin-bottom: 16px;
+    }
+
+    .app-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .app-subtitle {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* TABS */
+    .tabs {
+      margin-top: 16px;
+      display: flex;
+      border-radius: 999px;
+      background: #f3f4f6;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+    }
+
+    .tab-content {
+      margin-top: 16px;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* CARDS & FORM */
+    .card {
+      background: #f9fafb;
+      border-radius: var(--radius);
+      padding: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 16px;
+      }
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .edit-tag {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1.2fr 1fr 1fr;
+      }
+      .form-grid-notes {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      font-size: 0.85rem;
+      outline: none;
+      background: #ffffff;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2);
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 40px;
+      max-height: 100px;
+    }
+
+    .form-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-small {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+    }
+
+    /* IMAGE FIELD */
+    .image-field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .image-preview {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .image-preview.visible {
+      display: block;
+    }
+
+    .image-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .btn-outline {
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #374151;
+    }
+
+    .btn-outline:hover {
+      background: #e5e7eb;
+    }
+
+    /* FILTERS */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 768px) {
+      .filter-grid {
+        grid-template-columns: 1.2fr 1fr 1fr 1.1fr;
+      }
+    }
+
+    /* TABLE */
+    .table-wrapper {
+      background: #ffffff;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 0;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .table-inner {
+      min-width: 720px;
+    }
+
+    @media (min-width: 900px) {
+      .table-inner {
+        min-width: 0;
+      }
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 0.9fr 0.9fr 0.8fr 0.8fr 0.8fr;
+      gap: 4px;
+      padding: 8px;
+      background: linear-gradient(to right, var(--primary-soft), #fef3c7);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 0.9fr 0.9fr 0.8fr 0.8fr 0.8fr;
+      gap: 4px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      border-top: 1px solid #f3f4f6;
+      align-items: center;
+      background: #ffffff; /* filas blancas para evitar bloques de color */
+    }
+
+    .pill {
+      display: inline-flex;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-sold {
+      background: #bbf7d0;
+      color: #166534;
+    }
+
+    .pill-stock {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill-cat {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .pill-negative {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 4px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .btn-mini {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.7rem;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .btn-mini.edit {
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .btn-mini.sell {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .btn-mini.delete {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .table-empty {
+      padding: 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* TABLE FOOTER */
+    .table-footer {
+      border-top: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      background: #f9fafb;
+    }
+
+    .footer-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 0.75rem;
+    }
+
+    .footer-chip {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #111827;
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .footer-chip strong {
+      font-weight: 700;
+    }
+
+    /* RESUMEN */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    @media (min-width: 640px) {
+      .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .summary-card {
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    .summary-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .summary-value.positive {
+      color: var(--success);
+    }
+
+    .summary-value.negative {
+      color: var(--danger);
+    }
+
+    .summary-note {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: #eff6ff;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .summary-note strong {
+      color: var(--primary);
+    }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .chip span {
+      font-weight: 700;
+    }
+
+    /* EXPORT / TOOLS */
+    .tools-row {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      font-size: 0.75rem;
+      padding: 8px 10px 6px;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .btn-tool {
+      border-radius: 999px;
+      padding: 5px 10px;
+      border: 1px solid #d1d5db;
+      background: #f3f4f6;
+      cursor: pointer;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .btn-tool:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-tool.danger {
+      border-color: #fecaca;
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .btn-tool.danger:hover {
+      background: #fecaca;
+    }
+
+    .tools-help {
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding: 4px 10px 10px;
+      background: #f9fafb;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+
+    .tools-help strong {
+      color: var(--primary);
+    }
+
+    /* ITEM CELLS */
+    .image-thumb {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .item-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-name-btn {
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1d4ed8;
+      text-align: left;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .item-name-btn:hover {
+      color: #1e3a8a;
+    }
+
+    /* MODAL FICHA PRODUCTO */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 18px;
+      max-width: 420px;
+      width: 100%;
+      padding: 16px 16px 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      position: relative;
+    }
+
+    @media (min-width: 480px) {
+      .modal-card {
+        padding: 18px 20px 20px;
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      border: none;
+      background: #f3f4f6;
+      border-radius: 999px;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #4b5563;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .modal-image {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+      flex-shrink: 0;
+    }
+
+    .modal-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .modal-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: #4b5563;
+    }
+
+    .badge-positive {
+      background: #dcfce7;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .badge-negative {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .modal-section {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+
+    .modal-section-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      color: #111827;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 10px;
+    }
+
+    .modal-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .modal-value {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .modal-notes {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      background: #f3f4ff;
+      font-size: 0.8rem;
+      color: #374151;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1 class="app-title">Gestor de Reventas</h1>
+      <p class="app-subtitle">Apunta tus compras y ventas de forma rápida y clara.</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-apuntes">Apuntes</button>
+        <button class="tab-btn" data-tab="tab-resumen">Resumen</button>
+      </div>
+    </header>
+
+    <!-- TAB APUNTES -->
+    <section id="tab-apuntes" class="tab-content active">
+      <!-- FORMULARIO -->
+      <div class="card">
+        <div class="card-title">
+          <span id="formTitle">Nuevo apunte</span>
+          <span id="editTag" class="edit-tag" style="display:none;">Editando apunte</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Artículo</label>
+            <input type="text" id="name" placeholder="Ej: iPhone 12, Silla gaming..." />
+          </div>
+
+          <div class="field">
+            <label for="category">Categoría</label>
+            <input type="text" id="category" placeholder="Electrónica, Ropa, Hogar..." />
+          </div>
+
+          <div class="field">
+            <label for="date">Fecha compra</label>
+            <input type="date" id="date" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="buyPrice">Precio compra (€)</label>
+            <input type="number" id="buyPrice" step="0.01" min="0" placeholder="0,00" />
+          </div>
+
+          <div class="field">
+            <label for="sellPrice">Precio venta (€) (si ya vendiste)</label>
+            <input type="number" id="sellPrice" step="0.01" min="0" placeholder="0,00" />
+          </div>
+
+          <div class="field">
+            <label for="sellDate">Fecha venta (opcional)</label>
+            <input type="date" id="sellDate" />
+          </div>
+        </div>
+
+        <div class="form-grid form-grid-notes" style="margin-top:6px;">
+          <div class="field">
+            <label for="notes">Notas (opcional)</label>
+            <textarea id="notes" placeholder="Ej: estado del producto, dónde lo compraste, etc."></textarea>
+          </div>
+
+          <div class="field">
+            <label>Imagen (opcional)</label>
+            <div class="image-field-row">
+              <input type="file" id="imageInput" accept="image/*" />
+              <img id="imagePreview" class="image-preview" alt="Previsualización" />
+            </div>
+            <div class="image-buttons">
+              <button id="btnClearImage" type="button" class="btn-outline" style="display:none;">
+                Quitar imagen
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="cancelEditBtn" class="btn btn-ghost" type="button" style="display:none;">
+            Cancelar edición
+          </button>
+          <button id="saveBtn" class="btn btn-primary" type="button">
+            Guardar apunte
+          </button>
+        </div>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="card">
+        <div class="card-title">
+          <span>Filtros y búsqueda</span>
+        </div>
+        <div class="filter-grid">
+          <div class="field">
+            <label for="filterText">Buscar</label>
+            <input id="filterText" type="text" placeholder="Nombre, categoría o notas..." />
+          </div>
+          <div class="field">
+            <label for="filterState">Estado</label>
+            <select id="filterState">
+              <option value="all">Todos</option>
+              <option value="stock">En stock</option>
+              <option value="sold">Vendidos</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filterCategory">Categoría</label>
+            <select id="filterCategory">
+              <option value="all">Todas</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filterSort">Ordenar por</label>
+            <select id="filterSort">
+              <option value="dateDesc">Fecha compra (reciente primero)</option>
+              <option value="dateAsc">Fecha compra (antigua primero)</option>
+              <option value="nameAsc">Nombre (A-Z)</option>
+              <option value="buyDesc">Precio compra (mayor primero)</option>
+              <option value="profitDesc">Beneficio (mayor primero)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="card table-wrapper">
+        <div class="table-scroll">
+          <div class="table-inner">
+            <div class="table-header">
+              <span>Artículo</span>
+              <span>Categoría</span>
+              <span>Compra (€)</span>
+              <span>Venta (€)</span>
+              <span>Ganancia</span>
+              <span>Estado</span>
+              <span>Acciones</span>
+            </div>
+            <div id="tableBody"></div>
+            <div id="tableFooter" class="table-footer"></div>
+          </div>
+        </div>
+
+        <div class="tools-row">
+          <button class="btn-tool" type="button" id="btnExportCsv">Exportar CSV</button>
+          <button class="btn-tool" type="button" id="btnExportJson">Exportar copia (JSON)</button>
+          <button class="btn-tool" type="button" id="btnImport">Importar CSV/JSON</button>
+          <button class="btn-tool danger" type="button" id="btnClearAll">Vaciar todo</button>
+        </div>
+        <div class="tools-help">
+          <strong>Nota:</strong> el CSV solo exporta datos para Excel/Sheets.  
+          Para una copia completa (incluyendo imágenes), usa <strong>Exportar JSON</strong> y luego <strong>Importar JSON</strong>.
+        </div>
+        <!-- input oculto para importar -->
+        <input type="file" id="importFile" accept=".csv,application/json" style="display:none;" />
+      </div>
+    </section>
+
+    <!-- TAB RESUMEN -->
+    <section id="tab-resumen" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>Resumen de tus reventas</span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-label">Invertido (compra total)</div>
+            <div id="sumInvested" class="summary-value">0,00 €</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-label">Recuperado (ventas)</div>
+            <div id="sumRecovered" class="summary-value">0,00 €</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-label">Beneficio / Pérdida</div>
+            <div id="sumProfit" class="summary-value">0,00 €</div>
+          </div>
+        </div>
+
+        <div class="summary-grid" style="margin-top:10px;">
+          <div class="summary-card">
+            <div class="summary-label">Artículos vendidos</div>
+            <div id="countSold" class="summary-value">0</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-label">Artículos en stock</div>
+            <div id="countStock" class="summary-value">0</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-label">Dinero aún invertido en stock</div>
+            <div id="sumStockInvested" class="summary-value">0,00 €</div>
+          </div>
+        </div>
+
+        <div class="summary-note">
+          <strong>Consejo rápido:</strong> si ves que el dinero aún invertido en stock es muy alto,
+          quizá te convenga bajar precios o priorizar la venta de esos artículos.
+        </div>
+
+        <div class="summary-note" style="margin-top:10px;">
+          <strong>Categorías:</strong>
+          <div id="categoryChips" class="chips-row"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL FICHA PRODUCTO -->
+  <div id="itemModal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close" type="button" onclick="closeItemModal()">×</button>
+      <div class="modal-header">
+        <img id="modalImage" class="modal-image" src="" alt="Imagen producto" />
+        <div class="modal-title-block">
+          <div id="modalTitle" class="modal-title">Artículo</div>
+          <div id="modalSubtitle" class="modal-sub"></div>
+          <div class="modal-badges" id="modalBadges"></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Datos económicos</div>
+        <div class="modal-grid">
+          <div>
+            <div class="modal-label">Precio compra</div>
+            <div id="modalBuy" class="modal-value"></div>
+          </div>
+          <div>
+            <div class="modal-label">Precio venta</div>
+            <div id="modalSell" class="modal-value"></div>
+          </div>
+          <div>
+            <div class="modal-label">Beneficio</div>
+            <div id="modalProfit" class="modal-value"></div>
+          </div>
+          <div>
+            <div class="modal-label">Estado</div>
+            <div id="modalState" class="modal-value"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Fechas</div>
+        <div class="modal-grid">
+          <div>
+            <div class="modal-label">Compra</div>
+            <div id="modalBuyDate" class="modal-value"></div>
+          </div>
+          <div>
+            <div class="modal-label">Venta</div>
+            <div id="modalSellDate" class="modal-value"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Notas</div>
+        <div id="modalNotes" class="modal-notes"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Estado global ---
+    let items = [];
+    let editingId = null;
+    let currentImageData = null;
+    const STORAGE_KEY = "simpleResaleItems";
+
+    const filters = {
+      text: "",
+      state: "all",
+      category: "all",
+      sort: "dateDesc",
+    };
+
+    // --- Utilidades ---
+    function formatMoney(value) {
+      const num = Number(value) || 0;
+      return num.toFixed(2).replace(".", ",") + " €";
+    }
+
+    function loadItems() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          items = JSON.parse(stored);
+        } catch {
+          items = [];
+        }
+      } else {
+        items = [];
+      }
+    }
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    // --- Tabs ---
+    function setupTabs() {
+      const buttons = document.querySelectorAll(".tab-btn");
+      const contents = document.querySelectorAll(".tab-content");
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const tabId = btn.dataset.tab;
+
+          buttons.forEach((b) => b.classList.remove("active"));
+          contents.forEach((c) => c.classList.remove("active"));
+
+          btn.classList.add("active");
+          const tab = document.getElementById(tabId);
+          if (tab) tab.classList.add("active");
+
+          if (tabId === "tab-resumen") {
+            renderSummary();
+          }
+        });
+      });
+    }
+
+    // --- Formulario e imagen ---
+    function clearImage() {
+      currentImageData = null;
+      const preview = document.getElementById("imagePreview");
+      const btnClear = document.getElementById("btnClearImage");
+      preview.src = "";
+      preview.classList.remove("visible");
+      btnClear.style.display = "none";
+      document.getElementById("imageInput").value = "";
+    }
+
+    function handleImageChange(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        clearImage();
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        currentImageData = ev.target.result;
+        const preview = document.getElementById("imagePreview");
+        const btnClear = document.getElementById("btnClearImage");
+        preview.src = currentImageData;
+        preview.classList.add("visible");
+        btnClear.style.display = "inline-flex";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearForm() {
+      document.getElementById("name").value = "";
+      document.getElementById("category").value = "";
+      document.getElementById("date").value =
+        new Date().toISOString().split("T")[0];
+      document.getElementById("buyPrice").value = "";
+      document.getElementById("sellPrice").value = "";
+      document.getElementById("sellDate").value = "";
+      document.getElementById("notes").value = "";
+      clearImage();
+    }
+
+    function setCreateMode() {
+      editingId = null;
+      document.getElementById("formTitle").textContent = "Nuevo apunte";
+      document.getElementById("editTag").style.display = "none";
+      document.getElementById("cancelEditBtn").style.display = "none";
+      document.getElementById("saveBtn").textContent = "Guardar apunte";
+      clearForm();
+    }
+
+    function setEditMode(item) {
+      editingId = item.id;
+      document.getElementById("formTitle").textContent = "Editar apunte";
+      document.getElementById("editTag").style.display = "inline-flex";
+      document.getElementById("cancelEditBtn").style.display = "inline-flex";
+      document.getElementById("saveBtn").textContent = "Guardar cambios";
+
+      document.getElementById("name").value = item.name || "";
+      document.getElementById("category").value = item.category || "";
+      document.getElementById("date").value = item.date || "";
+      document.getElementById("buyPrice").value =
+        item.buyPrice != null ? item.buyPrice : "";
+      document.getElementById("sellPrice").value =
+        item.sellPrice != null ? item.sellPrice : "";
+      document.getElementById("sellDate").value = item.sellDate || "";
+      document.getElementById("notes").value = item.notes || "";
+
+      currentImageData = item.imageData || null;
+      const preview = document.getElementById("imagePreview");
+      const btnClear = document.getElementById("btnClearImage");
+      if (currentImageData) {
+        preview.src = currentImageData;
+        preview.classList.add("visible");
+        btnClear.style.display = "inline-flex";
+      } else {
+        clearImage();
+      }
+    }
+
+    function handleSave() {
+      const name = document.getElementById("name").value.trim();
+      const category = document.getElementById("category").value.trim();
+      const date = document.getElementById("date").value;
+      const buyPriceValue = document.getElementById("buyPrice").value;
+      const sellPriceValue = document.getElementById("sellPrice").value;
+      const sellDate = document.getElementById("sellDate").value;
+      const notes = document.getElementById("notes").value.trim();
+
+      if (!name || !date || !buyPriceValue) {
+        alert("Artículo, fecha de compra y precio de compra son obligatorios.");
+        return;
+      }
+
+      const buyPrice = parseFloat(buyPriceValue) || 0;
+      const sellPrice = sellPriceValue ? parseFloat(sellPriceValue) : null;
+
+      const item = {
+        id: editingId || Date.now(),
+        name,
+        category: category || "Sin categoría",
+        date,
+        buyPrice,
+        sellPrice,
+        sellDate: sellDate || null,
+        notes,
+        imageData: currentImageData || null,
+      };
+
+      if (editingId) {
+        items = items.map((it) => (it.id === editingId ? item : it));
+      } else {
+        items.push(item);
+      }
+
+      saveItems();
+      setCreateMode();
+      renderTable();
+      renderSummary();
+    }
+
+    // --- Filtros y categorías ---
+    function updateCategoryFilter() {
+      const sel = document.getElementById("filterCategory");
+      if (!sel) return;
+
+      const prev = sel.value;
+      const cats = Array.from(
+        new Set(items.map((i) => i.category || "Sin categoría"))
+      ).sort();
+
+      sel.innerHTML = '<option value="all">Todas</option>';
+      cats.forEach((cat) => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        sel.appendChild(opt);
+      });
+
+      if (cats.includes(prev)) {
+        sel.value = prev;
+      } else {
+        sel.value = "all";
+      }
+      filters.category = sel.value;
+    }
+
+    function setupFilters() {
+      const filterText = document.getElementById("filterText");
+      const filterState = document.getElementById("filterState");
+      const filterCategory = document.getElementById("filterCategory");
+      const filterSort = document.getElementById("filterSort");
+
+      filterText.addEventListener("input", () => {
+        filters.text = filterText.value.toLowerCase();
+        renderTable();
+      });
+
+      filterState.addEventListener("change", () => {
+        filters.state = filterState.value;
+        renderTable();
+      });
+
+      filterCategory.addEventListener("change", () => {
+        filters.category = filterCategory.value;
+        renderTable();
+      });
+
+      filterSort.addEventListener("change", () => {
+        filters.sort = filterSort.value;
+        renderTable();
+      });
+    }
+
+    function getFilteredAndSortedItems() {
+      let list = [...items];
+
+      // Texto
+      if (filters.text) {
+        list = list.filter((item) => {
+          const t =
+            (item.name || "") +
+            " " +
+            (item.category || "") +
+            " " +
+            (item.notes || "");
+          return t.toLowerCase().includes(filters.text);
+        });
+      }
+
+      // Estado
+      if (filters.state === "stock") {
+        list = list.filter((item) => item.sellPrice == null);
+      } else if (filters.state === "sold") {
+        list = list.filter((item) => item.sellPrice != null);
+      }
+
+      // Categoría
+      if (filters.category !== "all") {
+        list = list.filter(
+          (item) => (item.category || "Sin categoría") === filters.category
+        );
+      }
+
+      // Orden
+      list.sort((a, b) => {
+        const da = a.date || "";
+        const db = b.date || "";
+        const pa = a.buyPrice || 0;
+        const pb = b.buyPrice || 0;
+        const profA =
+          a.sellPrice != null ? (a.sellPrice || 0) - (a.buyPrice || 0) : -Infinity;
+        const profB =
+          b.sellPrice != null ? (b.sellPrice || 0) - (b.buyPrice || 0) : -Infinity;
+
+        switch (filters.sort) {
+          case "dateAsc":
+            return da.localeCompare(db);
+          case "dateDesc":
+            return db.localeCompare(da);
+          case "nameAsc":
+            return (a.name || "").localeCompare(b.name || "");
+          case "buyDesc":
+            return pb - pa;
+          case "profitDesc":
+            return profB - profA;
+          default:
+            return 0;
+        }
+      });
+
+      return list;
+    }
+
+    // --- Modal ficha producto ---
+    function openItemModal(id) {
+      const item = items.find((it) => it.id === id);
+      if (!item) return;
+
+      const sold = item.sellPrice != null;
+      const profit = sold ? (item.sellPrice || 0) - (item.buyPrice || 0) : 0;
+
+      const modal = document.getElementById("itemModal");
+      const img = document.getElementById("modalImage");
+      const title = document.getElementById("modalTitle");
+      const subtitle = document.getElementById("modalSubtitle");
+      const badges = document.getElementById("modalBadges");
+
+      const buyEl = document.getElementById("modalBuy");
+      const sellEl = document.getElementById("modalSell");
+      const profEl = document.getElementById("modalProfit");
+      const stateEl = document.getElementById("modalState");
+      const buyDateEl = document.getElementById("modalBuyDate");
+      const sellDateEl = document.getElementById("modalSellDate");
+      const notesEl = document.getElementById("modalNotes");
+
+      if (item.imageData) {
+        img.src = item.imageData;
+      } else {
+        img.src =
+          "data:image/svg+xml;utf8," +
+          encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="100%" height="100%" rx="18" fill="#e5e7eb"/><path d="M30 70 L50 50 L70 75 L85 60 L105 90 L15 90 Z" fill="#d1d5db"/><circle cx="45" cy="40" r="8" fill="#d1d5db"/></svg>'
+          );
+      }
+
+      title.textContent = item.name || "Artículo sin nombre";
+      subtitle.textContent = item.category || "Sin categoría";
+
+      badges.innerHTML = "";
+      const statusBadge = document.createElement("span");
+      statusBadge.className = "badge";
+      statusBadge.textContent = sold ? "Vendido" : "En stock";
+      badges.appendChild(statusBadge);
+
+      const buyBadge = document.createElement("span");
+      buyBadge.className = "badge";
+      buyBadge.textContent = `Compra: ${formatMoney(item.buyPrice || 0)}`;
+      badges.appendChild(buyBadge);
+
+      if (sold) {
+        const profitBadge = document.createElement("span");
+        profitBadge.className =
+          "badge " + (profit >= 0 ? "badge-positive" : "badge-negative");
+        profitBadge.textContent = `Beneficio: ${formatMoney(profit)}`;
+        badges.appendChild(profitBadge);
+      }
+
+      buyEl.textContent = formatMoney(item.buyPrice || 0);
+      sellEl.textContent =
+        item.sellPrice != null ? formatMoney(item.sellPrice) : "—";
+      profEl.textContent = sold ? formatMoney(profit) : "—";
+      if (sold) {
+        profEl.className =
+          "modal-value " + (profit >= 0 ? "badge-positive" : "badge-negative");
+      } else {
+        profEl.className = "modal-value";
+      }
+
+      stateEl.textContent = sold ? "Vendido" : "En stock";
+      buyDateEl.textContent = item.date
+        ? new Date(item.date).toLocaleDateString("es-ES")
+        : "—";
+      sellDateEl.textContent =
+        item.sellDate && sold
+          ? new Date(item.sellDate).toLocaleDateString("es-ES")
+          : "—";
+
+      notesEl.textContent = item.notes ? item.notes : "Sin notas.";
+
+      modal.classList.add("active");
+    }
+
+    function closeItemModal() {
+      document.getElementById("itemModal").classList.remove("active");
+    }
+
+    window.closeItemModal = closeItemModal;
+    window.openItemModal = openItemModal;
+
+    // Cerrar modal tocando fuera
+    document.addEventListener("click", (ev) => {
+      const modal = document.getElementById("itemModal");
+      if (!modal.classList.contains("active")) return;
+      if (ev.target === modal) {
+        closeItemModal();
+      }
+    });
+
+    // --- Ver imagen grande (mantengo por si quieres usarlo) ---
+    function viewImage(id) {
+      const item = items.find((it) => it.id === id);
+      if (!item || !item.imageData) return;
+      const win = window.open("", "_blank");
+      if (!win) return;
+      win.document.title = item.name || "Imagen";
+      win.document.body.style.margin = "0";
+      win.document.body.style.background = "#000";
+      win.document.body.innerHTML =
+        '<img src="' +
+        item.imageData +
+        '" style="max-width:100vw;max-height:100vh;display:block;margin:auto;" />';
+    }
+    window.viewImage = viewImage;
+
+    // --- Tabla ---
+    function renderTable() {
+      updateCategoryFilter();
+
+      const tableBody = document.getElementById("tableBody");
+      const tableFooter = document.getElementById("tableFooter");
+
+      const list = getFilteredAndSortedItems();
+
+      if (!list.length) {
+        tableBody.innerHTML =
+          '<div class="table-empty">No hay apuntes que coincidan con los filtros.</div>';
+        tableFooter.innerHTML = "";
+        return;
+      }
+
+      const rows = list
+        .map((item) => {
+          const sold = item.sellPrice != null;
+          const profit = sold ? item.sellPrice - (item.buyPrice || 0) : 0;
+          const profitText = sold ? formatMoney(profit) : "—";
+
+          const profitClass = sold
+            ? profit >= 0
+              ? "pill pill-sold"
+              : "pill pill-negative"
+            : "";
+
+          const dateText = item.date
+            ? new Date(item.date).toLocaleDateString("es-ES")
+            : "";
+
+          const imageHtml = item.imageData
+            ? `<img src="${item.imageData}" class="image-thumb" onclick="viewImage(${item.id})" alt="Imagen" />`
+            : "";
+
+          return `
+          <div class="table-row">
+            <div>
+              <div class="item-main">
+                ${imageHtml}
+                <div class="item-text">
+                  <button class="item-name-btn" onclick="openItemModal(${item.id})">
+                    ${item.name}
+                  </button>
+                  <div style="font-size:0.7rem;color:#6b7280;">
+                    ${dateText}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <span class="pill pill-cat">${item.category || "Sin categoría"}</span>
+            </div>
+            <div>${formatMoney(item.buyPrice || 0)}</div>
+            <div>${item.sellPrice != null ? formatMoney(item.sellPrice) : "—"}</div>
+            <div>${sold ? `<span class="${profitClass}">${profitText}</span>` : "—"}</div>
+            <div>
+              ${
+                sold
+                  ? '<span class="pill pill-sold">Vendido</span>'
+                  : '<span class="pill pill-stock">En stock</span>'
+              }
+            </div>
+            <div class="table-actions">
+              <button class="btn-mini edit" onclick="onEdit(${item.id})">Editar</button>
+              ${
+                !sold
+                  ? `<button class="btn-mini sell" onclick="onSell(${item.id})">Vender</button>`
+                  : ""
+              }
+              <button class="btn-mini delete" onclick="onDelete(${item.id})">Borrar</button>
+            </div>
+          </div>
+        `;
+        })
+        .join("");
+
+      tableBody.innerHTML = rows;
+
+      // Resumen del listado filtrado
+      let invested = 0;
+      let recovered = 0;
+      let costSold = 0;
+      let soldCount = 0;
+      let stockCount = 0;
+
+      list.forEach((item) => {
+        const buy = item.buyPrice || 0;
+        invested += buy;
+        if (item.sellPrice != null) {
+          const sell = item.sellPrice || 0;
+          recovered += sell;
+          costSold += buy;
+          soldCount += 1;
+        } else {
+          stockCount += 1;
+        }
+      });
+
+      const profit = recovered - costSold;
+
+      tableFooter.innerHTML = `
+        <div class="footer-chips">
+          <div class="footer-chip"><strong>Listado:</strong> ${list.length} apuntes</div>
+          <div class="footer-chip"><strong>Invertido:</strong> ${formatMoney(invested)}</div>
+          <div class="footer-chip"><strong>Recuperado:</strong> ${formatMoney(recovered)}</div>
+          <div class="footer-chip"><strong>Beneficio:</strong> ${formatMoney(profit)}</div>
+          <div class="footer-chip"><strong>Vendidos:</strong> ${soldCount}</div>
+          <div class="footer-chip"><strong>En stock:</strong> ${stockCount}</div>
+        </div>
+      `;
+    }
+
+    function onEdit(id) {
+      const item = items.find((it) => it.id === id);
+      if (!item) return;
+      setEditMode(item);
+      document.querySelector('[data-tab="tab-apuntes"]').click();
+    }
+
+    function onSell(id) {
+      const item = items.find((it) => it.id === id);
+      if (!item) return;
+      const clone = { ...item };
+      if (clone.sellPrice == null) {
+        clone.sellPrice = clone.buyPrice || 0;
+      }
+      if (!clone.sellDate) {
+        clone.sellDate = new Date().toISOString().split("T")[0];
+      }
+      setEditMode(clone);
+      document.querySelector('[data-tab="tab-apuntes"]').click();
+      const sellInput = document.getElementById("sellPrice");
+      if (sellInput) sellInput.focus();
+    }
+
+    function onDelete(id) {
+      const item = items.find((it) => it.id === id);
+      if (!item) return;
+
+      const ok = confirm(`¿Seguro que quieres borrar "${item.name}"?`);
+      if (!ok) return;
+
+      items = items.filter((it) => it.id !== id);
+      saveItems();
+      if (editingId === id) {
+        setCreateMode();
+      }
+      renderTable();
+      renderSummary();
+    }
+
+    window.onEdit = onEdit;
+    window.onSell = onSell;
+    window.onDelete = onDelete;
+
+    // --- Resumen general ---
+    function computeSummary() {
+      let invested = 0;
+      let recovered = 0;
+      let costOfSold = 0;
+      let soldCount = 0;
+      let stockCount = 0;
+      let stockInvested = 0;
+
+      const catMap = new Map();
+
+      items.forEach((item) => {
+        const buy = item.buyPrice || 0;
+        invested += buy;
+
+        const category = item.category || "Sin categoría";
+        const prevCat = catMap.get(category) || { count: 0, invested: 0 };
+        prevCat.count += 1;
+        prevCat.invested += buy;
+        catMap.set(category, prevCat);
+
+        if (item.sellPrice != null) {
+          const sell = item.sellPrice || 0;
+          recovered += sell;
+          costOfSold += buy;
+          soldCount += 1;
+        } else {
+          stockCount += 1;
+          stockInvested += buy;
+        }
+      });
+
+      const profit = recovered - costOfSold;
+
+      return {
+        invested,
+        recovered,
+        profit,
+        soldCount,
+        stockCount,
+        stockInvested,
+        categories: Array.from(catMap.entries()).map(([name, data]) => ({
+          name,
+          count: data.count,
+          invested: data.invested,
+        })),
+      };
+    }
+
+    function renderSummary() {
+      const {
+        invested,
+        recovered,
+        profit,
+        soldCount,
+        stockCount,
+        stockInvested,
+        categories,
+      } = computeSummary();
+
+      const sumInvested = document.getElementById("sumInvested");
+      const sumRecovered = document.getElementById("sumRecovered");
+      const sumProfit = document.getElementById("sumProfit");
+      const countSold = document.getElementById("countSold");
+      const countStock = document.getElementById("countStock");
+      const sumStockInvested = document.getElementById("sumStockInvested");
+      const categoryChips = document.getElementById("categoryChips");
+
+      sumInvested.textContent = formatMoney(invested);
+      sumRecovered.textContent = formatMoney(recovered);
+      sumProfit.textContent = formatMoney(profit);
+      sumProfit.className =
+        "summary-value " + (profit >= 0 ? "positive" : "negative");
+
+      countSold.textContent = soldCount;
+      countStock.textContent = stockCount;
+      sumStockInvested.textContent = formatMoney(stockInvested);
+
+      if (!categories.length) {
+        categoryChips.innerHTML = '<span class="chip">Sin datos todavía</span>';
+      } else {
+        categoryChips.innerHTML = categories
+          .sort((a, b) => b.invested - a.invested)
+          .map(
+            (c) =>
+              `<span class="chip">${c.name}: <span>${c.count}</span> · ${formatMoney(
+                c.invested
+              )}</span>`
+          )
+          .join("");
+      }
+    }
+
+    // --- Exportar / Importar / Vaciar ---
+    function exportCSV() {
+      if (!items.length) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+
+      const header = [
+        "id",
+        "nombre",
+        "categoria",
+        "fecha_compra",
+        "precio_compra",
+        "precio_venta",
+        "fecha_venta",
+        "notas",
+      ];
+
+      const rows = items.map((item) => [
+        item.id,
+        item.name || "",
+        item.category || "",
+        item.date || "",
+        item.buyPrice != null ? item.buyPrice : "",
+        item.sellPrice != null ? item.sellPrice : "",
+        item.sellDate || "",
+        (item.notes || "").replace(/(\r\n|\n|\r)/g, " "),
+      ]);
+
+      const all = [header, ...rows]
+        .map((row) =>
+          row
+            .map((field) => {
+              const f = String(field ?? "");
+              if (f.includes(";") || f.includes('"')) {
+                return '"' + f.replace(/"/g, '""') + '"';
+              }
+              return f;
+            })
+            .join(";")
+        )
+        .join("\n");
+
+      const blob = new Blob([all], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "reventas.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportJSON() {
+      if (!items.length) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(items, null, 2)], {
+        type: "application/json;charset=utf-8;",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "reventas-backup.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAll() {
+      if (!items.length) {
+        alert("No hay datos que borrar.");
+        return;
+      }
+      const ok = confirm(
+        "Esto borrará TODOS los apuntes de reventas. ¿Seguro?"
+      );
+      if (!ok) return;
+      items = [];
+      saveItems();
+      setCreateMode();
+      renderTable();
+      renderSummary();
+    }
+
+    function openImportDialog() {
+      document.getElementById("importFile").value = "";
+      document.getElementById("importFile").click();
+    }
+
+    function parseCsvRow(row) {
+      const result = [];
+      let current = "";
+      let insideQuotes = false;
+      for (let i = 0; i < row.length; i++) {
+        const c = row[i];
+        if (insideQuotes) {
+          if (c === '"') {
+            if (row[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              insideQuotes = false;
+            }
+          } else {
+            current += c;
+          }
+        } else {
+          if (c === ";") {
+            result.push(current);
+            current = "";
+          } else if (c === '"') {
+            insideQuotes = true;
+          } else {
+            current += c;
+          }
+        }
+      }
+      result.push(current);
+      return result;
+    }
+
+    function importFromCSV(text) {
+      const lines = text
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+      if (lines.length < 2) {
+        alert("CSV vacío o sin datos.");
+        return;
+      }
+
+      const headerCols = parseCsvRow(lines[0]);
+      const idx = {
+        id: headerCols.indexOf("id"),
+        name: headerCols.indexOf("nombre"),
+        category: headerCols.indexOf("categoria"),
+        date: headerCols.indexOf("fecha_compra"),
+        buy: headerCols.indexOf("precio_compra"),
+        sell: headerCols.indexOf("precio_venta"),
+        sellDate: headerCols.indexOf("fecha_venta"),
+        notes: headerCols.indexOf("notas"),
+      };
+
+      const imported = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCsvRow(lines[i]);
+        if (cols.length === 0) continue;
+
+        const get = (index) =>
+          index >= 0 && index < cols.length ? cols[index] : "";
+
+        const idRaw = get(idx.id);
+        const id = idRaw ? Number(idRaw) || idRaw : Date.now() + i;
+
+        const buyVal = get(idx.buy);
+        const sellVal = get(idx.sell);
+
+        imported.push({
+          id,
+          name: get(idx.name) || "",
+          category: get(idx.category) || "Sin categoría",
+          date: get(idx.date) || "",
+          buyPrice: buyVal ? parseFloat(buyVal) || 0 : 0,
+          sellPrice: sellVal ? parseFloat(sellVal) || null : null,
+          sellDate: get(idx.sellDate) || null,
+          notes: get(idx.notes) || "",
+          imageData: null, // CSV no incluye imagen
+        });
+      }
+
+      mergeImportedItems(imported);
+    }
+
+    function importFromJSON(text) {
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        alert("JSON no válido.");
+        return;
+      }
+
+      if (!Array.isArray(data)) {
+        alert("El JSON debe ser un array de movimientos.");
+        return;
+      }
+
+      const imported = data.map((obj, index) => {
+        const id = obj.id != null ? obj.id : Date.now() + index;
+        return {
+          id,
+          name: obj.name || obj.nombre || "",
+          category: obj.category || obj.categoria || "Sin categoría",
+          date: obj.date || obj.fecha_compra || "",
+          buyPrice: obj.buyPrice ?? obj.precio_compra ?? 0,
+          sellPrice: obj.sellPrice ?? obj.precio_venta ?? null,
+          sellDate: obj.sellDate || obj.fecha_venta || null,
+          notes: obj.notes || obj.notas || "",
+          imageData: obj.imageData || null,
+        };
+      });
+
+      mergeImportedItems(imported);
+    }
+
+    function mergeImportedItems(imported) {
+      if (!imported.length) {
+        alert("No se encontraron movimientos para importar.");
+        return;
+      }
+
+      const existingIds = new Set(items.map((it) => it.id));
+      const conflicts = imported.filter((it) => existingIds.has(it.id));
+      const newOnes = imported.filter((it) => !existingIds.has(it.id));
+
+      let overwrite = false;
+      if (conflicts.length > 0) {
+        overwrite = confirm(
+          `Se han encontrado ${conflicts.length} apuntes ya existentes.\n\n¿Quieres sobrescribir esos apuntes con los datos importados?\n\nAceptar: sobrescribe los coincidentes.\nCancelar: solo añade los nuevos.`
+        );
+      }
+
+      if (overwrite) {
+        const mapExisting = new Map(items.map((it) => [it.id, it]));
+        imported.forEach((imp) => {
+          mapExisting.set(imp.id, imp);
+        });
+        items = Array.from(mapExisting.values());
+      } else {
+        items = items.concat(newOnes);
+      }
+
+      saveItems();
+      setCreateMode();
+      renderTable();
+      renderSummary();
+
+      alert(
+        `Importación completada.\nTotal importados: ${imported.length}\nNuevos añadidos: ${newOnes.length}${
+          conflicts.length ? `\nCoincidentes: ${conflicts.length}` : ""
+        }`
+      );
+    }
+
+    function handleImportFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = reader.result;
+        const name = (file.name || "").toLowerCase();
+        if (name.endsWith(".json")) {
+          importFromJSON(text);
+        } else if (name.endsWith(".csv")) {
+          importFromCSV(text);
+        } else {
+          const trimmed = text.trim();
+          if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+            importFromJSON(text);
+          } else {
+            importFromCSV(text);
+          }
+        }
+      };
+      reader.readAsText(file, "utf-8");
+    }
+
+    // --- Inicialización ---
+    function init() {
+      setupTabs();
+      setupFilters();
+      loadItems();
+      setCreateMode();
+      updateCategoryFilter();
+      renderTable();
+      renderSummary();
+
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("date").value = today;
+
+      document
+        .getElementById("saveBtn")
+        .addEventListener("click", handleSave);
+      document
+        .getElementById("cancelEditBtn")
+        .addEventListener("click", setCreateMode);
+
+      document
+        .getElementById("btnExportCsv")
+        .addEventListener("click", exportCSV);
+      document
+        .getElementById("btnExportJson")
+        .addEventListener("click", exportJSON);
+      document
+        .getElementById("btnClearAll")
+        .addEventListener("click", clearAll);
+
+      document
+        .getElementById("btnImport")
+        .addEventListener("click", openImportDialog);
+      document
+        .getElementById("importFile")
+        .addEventListener("change", handleImportFile);
+
+      document
+        .getElementById("imageInput")
+        .addEventListener("change", handleImageChange);
+      document
+        .getElementById("btnClearImage")
+        .addEventListener("click", clearImage);
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
